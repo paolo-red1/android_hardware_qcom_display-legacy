@@ -34,6 +34,10 @@ namespace gralloc {
 struct alloc_data;
 class IMemAlloc;
 class IonAlloc;
+#ifdef USE_PMEM_CAMERA
+class PmemAdspAlloc;
+class PmemSmiAlloc;
+#endif
 
 class IAllocController {
 
@@ -54,7 +58,6 @@ class IAllocController {
 
 };
 
-#ifdef USE_ION
 class IonController : public IAllocController {
 
     public:
@@ -65,46 +68,18 @@ class IonController : public IAllocController {
     IonController();
 
     private:
-    IonAlloc* mIonAlloc;
-
-};
-#else
-class PmemKernelController : public IAllocController {
-
-    public:
-    virtual int allocate(alloc_data& data, int usage);
-
-    virtual IMemAlloc* getAllocator(int flags);
-
-    PmemKernelController ();
-
-    ~PmemKernelController ();
-
-    private:
-    IMemAlloc* mPmemAdspAlloc;
-
-};
-
-// Main pmem controller - this should only
-// be used within gralloc
-class PmemAshmemController : public IAllocController {
-
-    public:
-    virtual int allocate(alloc_data& data, int usage);
-
-    virtual IMemAlloc* getAllocator(int flags);
-
-    PmemAshmemController();
-
-    ~PmemAshmemController();
-
-    private:
     IMemAlloc* mPmemUserspaceAlloc;
     IMemAlloc* mAshmemAlloc;
     IAllocController* mPmemKernelCtrl;
 
-};
+
+    private:
+    IonAlloc* mIonAlloc;
+#ifdef USE_PMEM_CAMERA
+    PmemAdspAlloc* mPmemAlloc;
+    PmemSmiAlloc* mPmemSmipoolAlloc;
 #endif
+};
 
 } //end namespace gralloc
 #endif // GRALLOC_ALLOCCONTROLLER_H
